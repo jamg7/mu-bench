@@ -25,7 +25,8 @@ Usage:
     python scripts/transcribe.py --provider google-chirp3 --output-dir submissions/raw/google-chirp3 --region us
 
     # Gemini 3.5 Transcribe (Google)
-    python scripts/transcribe.py --provider gemini-3.5-transcribe --output-dir submissions/raw/gemini-3.5-transcribe --region us
+    python scripts/transcribe.py --provider gemini-3.5-transcribe \\
+        --output-dir submissions/raw/gemini-3.5-transcribe --region us
 
     # Limit to one locale
     python scripts/transcribe.py --provider deepgram-nova3 --locale en-US --output-dir /tmp/test
@@ -218,9 +219,7 @@ def _get_gemini_batch_token() -> tuple[str, str]:
             scopes=["https://www.googleapis.com/auth/cloud-platform"],
         )
     else:
-        creds, project_id = google.auth.default(
-            scopes=["https://www.googleapis.com/auth/cloud-platform"]
-        )
+        creds, project_id = google.auth.default(scopes=["https://www.googleapis.com/auth/cloud-platform"])
 
     if not creds.valid:
         creds.refresh(Request())
@@ -504,9 +503,7 @@ async def transcribe_gemini_3_5_batch(session: aiohttp.ClientSession, wav_bytes:
         ],
         "generationConfig": {"audioTranscriptionConfig": transcription_config},
     }
-    data = await _post_with_retry(
-        session, url, headers, json.dumps(payload).encode("utf-8"), "Gemini-3.5-Transcribe"
-    )
+    data = await _post_with_retry(session, url, headers, json.dumps(payload).encode("utf-8"), "Gemini-3.5-Transcribe")
     candidates = data.get("candidates") or []
     candidate = candidates[0] if candidates else {}
     content = candidate.get("content") or {}
